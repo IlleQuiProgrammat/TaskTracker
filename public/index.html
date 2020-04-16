@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Test site</title>
+	</head>
+	<body>
+		<h1>Socket testing</h1>
+
+		<div style="display:flex; flex-wrap: wrap;" id='task_location'></div>
+
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js" integrity="sha256-bQmrZe4yPnQrLTY+1gYylfNMBuGfnT/HKsCGX+9Xuqo=" crossorigin="anonymous"></script>
+		<script>
+let socket = io.connect('http://localhost:3000');
+socket.emit('update', {full: true});
+let colourDef = [];
+let bgcolours = [];
+let tasks = [];
+let stateArr = [];
+socket.on('update', (data) => {
+	task_location = document.querySelector('#task_location');
+	if (data.colourRef) { bgcolours = data.colourRef; stateArr = (new Array(data.colourRef.length)).fill(0); }
+	if (data.colourDef) colourDef = data.colourDef;
+	if (data.changes) {
+		tasks = data.changes;
+		for (let i = 0; i < data.changes.length; i++) {
+			console.log(`A change was made! ${JSON.stringify(data.changes[i])}`);
+			task_location.innerHTML += `<div onclick="rotateDay(this, ${data.changes[i].id})" style="width: 50px; height: 50px; background-color: ${bgcolours[data.changes[i].state]}; border-radius: 50%; border: 1px black solid; text-align:center; line-height: 50px; margin: 5px; user-select: none; font-size: 8px;">${data.changes[i].name}</div>`;
+			stateArr[data.changes[i].state]++;
+		}
+	}
+});
+
+function rotateDay(element, id) {
+	let currentColour = bgcolours.indexOf(element.style.backgroundColor);
+	element.style.backgroundColor = bgcolours[(currentColour+1) % bgcolours.length];
+	socket.emit('save', {id: id, state: (currentColour+1) % bgcolours.length});
+}
+
+	</script>
+	</body>
+</html>
