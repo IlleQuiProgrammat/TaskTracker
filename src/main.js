@@ -7,7 +7,7 @@ let server = app.listen(3000);
 app.use(express.static('public'));
 
 globalData = {
-	colourDef: ['No data', 'something else', 'another thing', 'another thing', 'another thing', 'another thing', 'another thing'],
+	colourDef: ['No data', '1 problem', '2 problems', '3 problems', '4 problems', '5 <= x < 10 problems', '10+'],
 	colourRef: ['rgb(255, 255, 255)', 'rgb(240, 248, 255)', 'aqua', 'aquamarine', 'blue', 'rgb(138, 43, 226)', 'chartreuse'],
 	tasks: [
 		{id: 1, state: 0, name: ""},
