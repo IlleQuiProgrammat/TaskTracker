@@ -5,6 +5,8 @@ const exit_hook = require('exit-hook');
 const fs = require('fs');
 
 const port = 3000;
+const update_rate = 20000;
+
 
 let app = express();
 let server = app.listen(port);
@@ -41,8 +43,13 @@ console.log("WebSockets initialised for communication.");
 
 function save() {
 	fs.writeFileSync('storage.json', JSON.stringify(globalData));
-	console.log("Saved!")
+	console.log("Saved!");
 }
 
-setTimeout(save, 20000);
+function saveRepeat() {
+	save();
+	setTimeout(saveRepeat, update_rate);
+}
+
+saveRepeat();
 exit_hook(save);
