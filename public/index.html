@@ -1,13 +1,21 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>Test site</title>
+		<title>TaskTracker</title>
 	</head>
 	<body>
-		<h1>Socket testing</h1>
-		<div id="Progress_bar"></div>
-		<ul id="key" style="border-radius: 3px; border: 1px solid black; padding-top: 10px; padding-bottom: 10px;"><h2>Key</h2></ul>
-		<div style="display:flex; flex-wrap: wrap;" id='task_location'></div>
+		<div style="position: fixed; top: 0; left: 0; z-index: 50; width: 20%;">
+			<h1>TaskTracker</h1>
+			<ul id="key" style="border-radius: 3px; border: 1px solid black; padding-top: 10px; padding-bottom: 10px; width: 100%;"><h2>Key</h2></ul>
+		</div>
+		<div style="margin-left: calc(20% + 50px);">
+			<div id="progress_bar" style="height: 20px; display: flex; justify-content: flex-start; align-items: center; border-radius: 5px; border: solid 1px black;">
+				<div style="background-color: black; width: 20%; height: 100%;" title="20%">
+					
+				</div>
+			</div>
+			<div style="display:flex; flex-wrap: wrap;" id='task_location'></div>
+		</div>
 
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js" integrity="sha256-bQmrZe4yPnQrLTY+1gYylfNMBuGfnT/HKsCGX+9Xuqo=" crossorigin="anonymous"></script>
 		<script>
@@ -31,17 +39,31 @@ socket.on('update', (data) => {
 	if (data.changes) {
 		tasks = data.changes;
 		for (let i = 0; i < data.changes.length; i++) {
-			console.log(`A change was made! ${JSON.stringify(data.changes[i])}`);
+			// console.log(`A change was made! ${JSON.stringify(data.changes[i])}`);
 			task_location.innerHTML += `<div onclick="rotateDay(this, ${data.changes[i].id})" style="width: 50px; height: 50px; background-color: ${bgcolours[data.changes[i].state]}; border-radius: 50%; border: 1px black solid; text-align:center; line-height: 50px; margin: 5px; user-select: none; font-size: 8px;">${data.changes[i].name}</div>`;
 			stateArr[data.changes[i].state]++;
 		}
 	}
+	updateProgress();
 });
+
+function updateProgress() {
+	progress_bar = document.querySelector("#progress_bar");
+	string_building = "";
+	for (let i = colourDef.length - 1; i >= 0; i--) {
+		percentage = (stateArr[i] / tasks.length) * 100;
+		string_building += `<div style="background-color: ${bgcolours[i]}; width: ${percentage}%; height: 100%;" title="${percentage}%"></div>`;
+	}
+	progress_bar.innerHTML = string_building;
+}
 
 function rotateDay(element, id) {
 	let currentColour = bgcolours.indexOf(element.style.backgroundColor);
 	element.style.backgroundColor = bgcolours[(currentColour+1) % bgcolours.length];
 	socket.emit('save', {id: id, state: (currentColour+1) % bgcolours.length});
+	stateArr[currentColour]--;
+	stateArr[currentColour+1]++;
+	updateProgress();
 }
 
 	</script>
